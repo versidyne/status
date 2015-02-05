@@ -1,0 +1,2 @@
+# status
+Simple Status Page
