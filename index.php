@@ -175,6 +175,7 @@
 							}
 						}
 						$log = file_get_contents("{$path}/{$latest_filename}", NULL, NULL);
+						if ($log == null) { $log = "There aren't any recent crash logs to pull from."; }
 						echo "<p>".nl2br($log)."</p>";
 					?>
 				</div>
