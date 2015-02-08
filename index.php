@@ -24,16 +24,11 @@
 				<div class="tab-pane active" id="tab_a">
 					<h4>Service Status</h4>
 					<?php
-						// network information
 						$host = 'localhost';
 						$ports = array(22, 25, 80, 3306, 7900, 25565);
-						// initiate loop
 						foreach ($ports as $port) {
-							// wipe array
 							$info = array();
-							// assign port
 							$info["port"] = $port;
-							// port identification
 							if ($info["port"] == 22) { $info["name"] = "SSH"; }
 							elseif ($info["port"] == 25) { $info["name"] = "SMTP"; }
 							elseif ($info["port"] == 80) { $info["name"] = "HTTP"; }
@@ -42,7 +37,6 @@
 							elseif ($info["port"] == 7900) { $info["name"] = "Vexis"; }
 							elseif ($info["port"] == 25565) { $info["name"] = "Minecraft"; }
 							else { $info["name"] = "Unknown"; }
-							// port check
 							$connection = @fsockopen($host, $port);
 							if (is_resource($connection)) {
 								$info["alert"] = "alert-success";
@@ -56,7 +50,6 @@
 								$info["sr-only"] = "Error:";
 								$info["status"] = "offline";
 							}
-							// display information
 							echo "
 							<p>
 								<div class=\"alert {$info["alert"]}\" role=\"alert\">
@@ -103,53 +96,36 @@
 				<div class="tab-pane" id="tab_c">
 					<h4>Minecraft Server Information</h4>
 					<?php
-						// minecraft status function
 						function mc_status($host,$port='25565') {
-							// record start time
 							$timeInit = microtime();
-							// clear variables
 							$response = '';
-							// connect
 							$fp = fsockopen($host,$port,$errno,$errstr,$timeout=10);
 							if(!$fp) {
-								// record end time
 								$timeEnd = microtime();
-								// output information
 								$response[0] = "Error {$errno}: {$errstr}.";
 								$response[1] = 0;
 								$response[2] = 0;
-								// calculate times
 								$timeDiff = $timeEnd-$timeInit;
 								$response[] = $timeDiff < 0 ? 0 : $timeDiff;
 							}
 							else {
-								// request information
 								fputs($fp, "\xFE");
-								// receive information
 								while(!feof($fp)) $response .= fgets($fp);
-								// close connection
 								fclose($fp);
-								// record end time
 								$timeEnd = microtime();
-								// remove NULL
 								$response = str_replace("\x00", "", $response);
-								// remove first portion of data
-								$response = explode("\xFF\x16", $response);
+								//echo bin2hex($response);
+								$response = explode("\xFF\x13", $response);
 								$response = $response[1];
 								//echo(dechex(ord($response[0])));
-								// separate data
 								$response = explode("\xA7", $response);
-								// calculate times
 								$timeDiff = $timeEnd-$timeInit;
 								$response[] = $timeDiff < 0 ? 0 : $timeDiff;
 							}
 							return $response;
 						}
-						// run status function
 						$data = mc_status('localhost');
-						// round request time
 						$data[3] = round($data[3], 6);
-						// display output
 						echo "
 						<p>
 							MOTD: {$data[0]}<br>
