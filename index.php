@@ -95,45 +95,65 @@
 				</div>
 				<div class="tab-pane" id="tab_c">
 					<h4>Minecraft Server Information</h4>
-					<?php
-						function mc_status($host,$port='25565') {
-							$timeInit = microtime();
-							$response = '';
-							$fp = fsockopen($host,$port,$errno,$errstr,$timeout=10);
-							if(!$fp) {
-								$timeEnd = microtime();
-								$response[0] = "Error {$errno}: {$errstr}.";
-								$response[1] = 0;
-								$response[2] = 0;
-								$timeDiff = $timeEnd-$timeInit;
-								$response[] = $timeDiff < 0 ? 0 : $timeDiff;
+					<p>
+						<?php
+							function mc_status($host,$port='25565') {
+								$timeInit = microtime();
+								$fp = fsockopen($host,$port,$errno,$errstr,$timeout=10);
+								if(!$fp) {
+									$timeDiff = microtime()-$timeInit;
+									$response = [];
+									$response[0] = ($timeDiff > 0) ? $timeDiff : 0;
+									$response[1] = "Error {$errno}: {$errstr}.";
+									$response[2] = 0;
+									$response[3] = 0;
+									$response[4] = 0;
+								} else {
+									$data = '';
+									fputs($fp, "\xFE");
+									while(!feof($fp)) $data = fgets($fp);
+									fclose($fp);
+									$timeEnd = microtime();
+									$timeDiff = $timeEnd-$timeInit;
+
+									if (!empty($data)) {
+										$data = str_replace("\x00", "", $data);
+										$raw = chunk_split(strtoupper(bin2hex($data)), 2, " ");
+										$data = str_replace("\xFF", "", $data);
+										$version = hexdec(bin2hex(substr($data, 0, 1)));
+										$data = explode("\xA7", substr($data, 1));
+										$data[] = $version;
+									} else {
+										$data = [0, 0, 0];
+									}
+									$diagnostics = [
+										($timeDiff > 0) ? $timeDiff : 0,
+										$raw
+									];
+									$response = array_merge($diagnostics, $data);
+								}
+								return $response;
 							}
-							else {
-								fputs($fp, "\xFE");
-								while(!feof($fp)) $response .= fgets($fp);
-								fclose($fp);
-								$timeEnd = microtime();
-								$response = str_replace("\x00", "", $response);
-								//echo bin2hex($response);
-								$response = explode("\xFF\x13", $response);
-								$response = $response[1];
-								//echo(dechex(ord($response[0])));
-								$response = explode("\xA7", $response);
-								$timeDiff = $timeEnd-$timeInit;
-								$response[] = $timeDiff < 0 ? 0 : $timeDiff;
+							//$data = mc_status('72.192.190.11');
+							$data = mc_status('localhost');
+							$data[0] = round($data[0], 6);
+							if ($data[5] > 5 && $data[5] < 47) {
+								$data[5] = "1.7.10";
+							} elseif ($data[5] == 47) {
+								$data[5] = "1.8";
+							} elseif ($data[5] > 47 && $data[5] < 74) {
+								$data[5] = "1.8.8";
+							} else {
+								$data[5] = "Unknown Protocol {$data[5]}";
 							}
-							return $response;
-						}
-						$data = mc_status('localhost');
-						$data[3] = round($data[3], 6);
-						echo "
-						<p>
-							MOTD: {$data[0]}<br>
-							Online Players: {$data[1]}<br>
-							Total Slots: {$data[2]}<br>
-							Latency: {$data[3]} ms
-						</p>";
-					?>
+							if (isset($data[2])) echo "MOTD: {$data[2]}<br>";
+							if (isset($data[3])) echo "Online Players: {$data[3]}<br>";
+							if (isset($data[4])) echo "Total Slots: {$data[4]}<br>";
+							if (isset($data[5])) echo "Version: {$data[5]}<br>";
+							echo "Latency: {$data[0]} ms<br>";
+							echo "Raw (Hex): {$data[1]}";
+						?>
+					</p>
 				</div>
 				<div class="tab-pane" id="tab_d">
 					<h4>Minecraft Crash Report</h4>
