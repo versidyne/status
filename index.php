@@ -5,75 +5,125 @@
 		<meta http-equiv="X-UA-Compatible" content="IE=edge">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<title>Versidyne Service Status</title>
-		<link href="css/bootstrap.min.css" rel="stylesheet">
-		<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-		<!--[if lt IE 9]>
-		<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
-		<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-		<![endif]-->
+		<link rel="stylesheet" href="https://cdn.rawgit.com/twbs/bootstrap/v4-dev/dist/css/bootstrap.css" integrity="sha256-KYSibLqtHLMGuliDO4d+5xlTWPtitMzXxnawFVZGrMA=" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+        <script src="//github.hubspot.com/tether/dist/js/tether.js"></script>
+        <script src="//code.jquery.com/jquery-2.2.1.min.js"></script>
+		<script src="//cdn.rawgit.com/twbs/bootstrap/v4-dev/dist/js/bootstrap.js" integrity="sha256-tT7AJzZdVt/IDNRCHKU3tbc9pp/+bAZA2EdNb6us3ns=" crossorigin="anonymous"></script>
 	</head>
-	<body>
+	<body style="padding-top:25px">
 		<div class="container">
-			<ul class="nav nav-pills nav-stacked col-md-3">
-				<li class="active"><a href="#tab_a" data-toggle="pill">Service Status</a></li>
-				<li><a href="#tab_b" data-toggle="pill">Job Queue</a></li>
-				<li><a href="#tab_c" data-toggle="pill">Minecraft Server Information</a></li>
-				<li><a href="#tab_d" data-toggle="pill">Minecraft Crash Report</a></li>
-			</ul>
-			<div class="tab-content col-md-9">
-				<div class="tab-pane active" id="tab_a">
+            <!-- Nav tabs -->
+            <ul class="nav nav-pills nav-stacked col-md-3" id="infoTab" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active" id="service-status-tab" data-toggle="tab" href="#service-status" role="tab" aria-controls="service-status" aria-expanded="true">Service Status</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="job-queue-tab" data-toggle="tab" href="#job-queue" role="tab" aria-controls="job-queue">Job Queue</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" id="minecraft-menu-tab" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-controls="minecraft-menu">Minecraft</a>
+                    <div id="minecraft-menu" class="dropdown-menu" aria-labelledby="minecraft-menu-tab">
+                        <a class="dropdown-item" id="minecraft-info-tab" href="#minecraft-info" role="tab" data-toggle="tab" aria-controls="minecraft-info">Server Information</a>
+                        <a class="dropdown-item" id="minecraft-crash-tab" href="#minecraft-crash" role="tab" data-toggle="tab" aria-controls="minecraft-crash">Crash Report</a>
+                    </div>
+                </li>
+            </ul>
+            <!-- Tab panes -->
+			<div class="tab-content col-md-9" id="infoTabContent">
+				<div class="tab-pane fade in active" id="service-status" role="tabpanel" aria-labelledby="service-status-tab">
 					<h4>Service Status</h4>
 					<?php
-						$host = 'localhost';
-						$ports = array(22, 25, 80, 3306, 7900, 25565);
-						foreach ($ports as $port) {
-							$info = array();
-							$info["port"] = $port;
-							if ($info["port"] == 22) { $info["name"] = "SSH"; }
-							elseif ($info["port"] == 25) { $info["name"] = "SMTP"; }
-							elseif ($info["port"] == 80) { $info["name"] = "HTTP"; }
-							elseif ($info["port"] == 3306) { $info["name"] = "MYSQL"; }
-							elseif ($info["port"] == 3784) { $info["name"] = "Ventrilo"; }
-							elseif ($info["port"] == 7900) { $info["name"] = "Vexis"; }
-							elseif ($info["port"] == 25565) { $info["name"] = "Minecraft"; }
-							else { $info["name"] = "Unknown"; }
-							$connection = @fsockopen($host, $port);
+						$services = [
+                            [
+                                'host' => 'localhost',
+                                'port' => 22,
+                                'name' => 'SSH'
+                            ],
+                            [
+                                'host' => 'localhost',
+                                'port' => 25,
+                                'name' => 'SMTP',
+                                'enabled' => false
+                            ],
+                            [
+                                'host' => 'localhost',
+                                'port' => 80,
+                                'name' => 'HTTP'
+                            ],
+                            [
+                                'host' => 'localhost',
+                                'port' => 443,
+                                'name' => 'HTTPS',
+                                'enabled' => false
+                            ],
+                            [
+                                'host' => 'localhost',
+                                'port' => 3306,
+                                'name' => 'MySQL'
+                            ],
+                            [
+                                'host' => 'localhost',
+                                'port' => 3784,
+                                'name' => 'Ventrilo',
+                                'enabled' => false
+                            ],
+                            [
+                                'host' => 'localhost',
+                                'port' => 7900,
+                                'name' => 'Vexis',
+                                'enabled' => false
+                            ],
+                            [
+                                'host' => 'localhost',
+                                'port' => 25565,
+                                'name' => 'Minecraft'
+                            ],
+                            [
+                                'host' => 'udp://localhost',
+                                'port' => 34197,
+                                'name' => 'Factorio'
+                            ]
+                        ];
+						foreach ($services as $service) {
+                            if (isset($service['enabled']) && !$service['enabled']) continue;
+							$connection = @fsockopen($service['host'], $service['port']);
 							if (is_resource($connection)) {
-								$info["alert"] = "alert-success";
-								$info["icon"] = "glyphicon-ok-sign";
-								$info["sr-only"] = "Success:";
-								$info["status"] = "online";
+								$service["alert"] = "alert-success";
+								$service["icon"] = "check-circle";
+								$service["sr-only"] = "Success:";
+								$service["status"] = "online";
 								fclose($connection);
 							} else {
-								$info["alert"] = "alert-danger";
-								$info["icon"] = "glyphicon-exclamation-sign";
-								$info["sr-only"] = "Error:";
-								$info["status"] = "offline";
+								$service["alert"] = "alert-danger";
+								$service["icon"] = "exclamation-triangle";
+								$service["sr-only"] = "Error:";
+								$service["status"] = "offline";
 							}
 							echo "
 							<p>
-								<div class=\"alert {$info["alert"]}\" role=\"alert\">
-									<span class=\"glyphicon {$info["icon"]}\" aria-hidden=\"true\"></span>
-									<span class=\"sr-only\">{$info["sr-only"]}</span>
-									{$info["name"]} service is currently {$info["status"]}.
+								<div class=\"alert {$service["alert"]}\" role=\"alert\">
+									<span class=\"fa fa-{$service["icon"]}\" aria-hidden=\"true\"></span>
+									<span class=\"sr-only\">{$service["sr-only"]}</span>
+									{$service["name"]} service is currently {$service["status"]}.
 								</div>
 							</p>";
 						}
 					?>
 				</div>
-				<div class="tab-pane" id="tab_b">
+				<div class="tab-pane fade" id="job-queue" role="tabpanel" aria-labelledby="job-queue-tab">
 					<h4>Job Queue</h4>
 					<?php
 						$rss = new DOMDocument();
 						$rss->load('https://manager.linode.com/events/rss/f994713165e4bab1b289d39657ccf9b597968ff8');
 						$feed = array();
 						foreach ($rss->getElementsByTagName('item') as $node) {
-							$item = array ( 
+							$item = [
 								'title' => $node->getElementsByTagName('title')->item(0)->nodeValue,
 								'desc' => $node->getElementsByTagName('description')->item(0)->nodeValue,
 								'link' => $node->getElementsByTagName('link')->item(0)->nodeValue,
 								'date' => $node->getElementsByTagName('pubDate')->item(0)->nodeValue,
-							);
+                            ];
 							array_push($feed, $item);
 						}
 						$limit = 5;
@@ -93,7 +143,7 @@
 						}
 					?>
 				</div>
-				<div class="tab-pane" id="tab_c">
+				<div class="tab-pane fade" id="minecraft-info" role="tabpanel" aria-labelledby="minecraft-info-tab">
 					<h4>Minecraft Server Information</h4>
 					<p>
 						<?php
@@ -155,7 +205,7 @@
 						?>
 					</p>
 				</div>
-				<div class="tab-pane" id="tab_d">
+				<div class="tab-pane fade" id="minecraft-crash" role="tabpanel" aria-labelledby="minecraft-crash-tab">
 					<h4>Minecraft Crash Report</h4>
 					<?php
 						$path = "/mnt/xvdc/services/forge/crash-reports"; 
@@ -177,9 +227,5 @@
 				</div>
 			</div>
 		</div>
-		<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-		<!-- Include all compiled plugins (below), or include individual files as needed -->
-		<script src="js/bootstrap.min.js"></script>
 	</body>
 </html>
