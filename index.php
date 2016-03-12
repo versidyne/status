@@ -19,15 +19,14 @@
                     <a class="nav-link active" id="service-status-tab" data-toggle="tab" href="#service-status" role="tab" aria-controls="service-status" aria-expanded="true">Service Status</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" id="job-queue-tab" data-toggle="tab" href="#job-queue" role="tab" aria-controls="job-queue">Job Queue</a>
+                    <a class="nav-link" id="job-queue-tab" href="#job-queue" role="tab" data-toggle="tab" aria-controls="job-queue">Job Queue</a>
                 </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" id="minecraft-menu-tab" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-controls="minecraft-menu">Minecraft</a>
-                    <div id="minecraft-menu" class="dropdown-menu" aria-labelledby="minecraft-menu-tab">
-                        <a class="dropdown-item" id="minecraft-info-tab" href="#minecraft-info" role="tab" data-toggle="tab" aria-controls="minecraft-info">Server Information</a>
-                        <a class="dropdown-item" id="minecraft-crash-tab" href="#minecraft-crash" role="tab" data-toggle="tab" aria-controls="minecraft-crash">Crash Report</a>
-                    </div>
-                </li>
+				<li class="nav-item">
+                    <a class="nav-link" id="minecraft-info-tab" href="#minecraft-info" role="tab" data-toggle="tab" aria-controls="minecraft-info">Minecraft Server Information</a>
+				</li>
+				<li class="nav-item">
+                    <a class="nav-link" id="minecraft-crash-tab" href="#minecraft-crash" role="tab" data-toggle="tab" aria-controls="minecraft-crash">Minecraft Crash Report</a>
+				</li>
             </ul>
             <!-- Tab panes -->
 			<div class="tab-content col-md-9" id="infoTabContent">
