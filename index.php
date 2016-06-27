@@ -5,11 +5,11 @@
 		<meta http-equiv="X-UA-Compatible" content="IE=edge">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<title>Versidyne Service Status</title>
-		<link rel="stylesheet" href="https://cdn.rawgit.com/twbs/bootstrap/v4-dev/dist/css/bootstrap.css" integrity="sha256-KYSibLqtHLMGuliDO4d+5xlTWPtitMzXxnawFVZGrMA=" crossorigin="anonymous">
+		<link rel="stylesheet" href="https://cdn.rawgit.com/twbs/bootstrap/v4-dev/dist/css/bootstrap.css" crossorigin="anonymous">
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
         <script src="//github.hubspot.com/tether/dist/js/tether.js"></script>
         <script src="//code.jquery.com/jquery-2.2.1.min.js"></script>
-		<script src="//cdn.rawgit.com/twbs/bootstrap/v4-dev/dist/js/bootstrap.js" integrity="sha256-tT7AJzZdVt/IDNRCHKU3tbc9pp/+bAZA2EdNb6us3ns=" crossorigin="anonymous"></script>
+		<script src="//cdn.rawgit.com/twbs/bootstrap/v4-dev/dist/js/bootstrap.js" crossorigin="anonymous"></script>
 	</head>
 	<body style="padding-top:25px">
 		<div class="container">
@@ -76,12 +76,14 @@
                             [
                                 'host' => 'localhost',
                                 'port' => 25565,
-                                'name' => 'Minecraft'
+                                'name' => 'Minecraft',
+								'enabled' => false
                             ],
                             [
                                 'host' => 'udp://localhost',
                                 'port' => 34197,
-                                'name' => 'Factorio'
+                                'name' => 'Factorio',
+								'enabled' => false
                             ]
                         ];
 						foreach ($services as $service) {
